@@ -1,6 +1,7 @@
+import sys
 from pyspark.sql import *
 from lib.logger import Log4j
-from lib.utils import get_spark_app_config
+from lib.utils import get_spark_app_config,load_df
 
 if __name__ == "__main__":
     conf = get_spark_app_config()
@@ -12,23 +13,18 @@ if __name__ == "__main__":
     spark = SparkSession.builder \
         .config(conf=conf) \
         .getOrCreate()
-        
-    """
-    print("Hello from pyspark")
-    sample_data = [{"name": "John    D.", "age": 30},
-        {"name": "Alice   G.", "age": 25},
-        {"name": "Bob  T.", "age": 35},
-        {"name": "Eve   A.", "age": 28}]
-    
-    df = spark.createDataFrame(sample_data)
-    df.show()
-    df.printSchema()
-    """
     logger = Log4j(spark)
-    logger.info("It works from Hello Spark!!!")
 
-    conf_out = spark.sparkContext.getConf()
-    logger.info(conf_out.toDebugString())
-
+    if len(sys.argv) != 2:
+        logger.error("Usage: App <filename>")
+        sys.exit(-1)
+    
+    logger.info("Starting App!!!")
+    #This is used to print conf parameters
+    #conf_out = spark.sparkContext.getConf()
+    #logger.info(conf_out.toDebugString())
+    df = load_df(spark,sys.argv[1])
+    df.show()
+    
     logger.info("Finished Hello Spark")
     spark.stop()
