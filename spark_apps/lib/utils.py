@@ -1,6 +1,6 @@
 import configparser
 from pyspark import SparkConf
-from pyspark.sql.types import StructType,StructField,IntegerType,StringType,DoubleType
+from pyspark.sql.types import StructType,StructField,IntegerType,StringType,DoubleType,DateType
 
 def get_spark_app_config():
     spark_conf = SparkConf()
@@ -20,8 +20,22 @@ circuits_schema = StructType(fields=[StructField("circuitId", IntegerType(), Fal
                                      StructField("alt", IntegerType(), True),
                                      StructField("url", StringType(), True)
 ])
-def load_df(spark, data_file):
+races_schema = StructType(fields=[StructField("raceId", IntegerType(), False),
+                                  StructField("year", IntegerType(), True),
+                                  StructField("round", IntegerType(), True),
+                                  StructField("circuitId", IntegerType(), True),
+                                  StructField("name", StringType(), True),
+                                  StructField("date", DateType(), True),
+                                  StructField("time", StringType(), True),
+                                  StructField("url", StringType(), True) 
+])
+def load_circuits_df(spark, data_file):
     return spark.read\
         .option("header","true") \
         .schema(circuits_schema) \
+        .csv(data_file)
+def load_races_df(spark, data_file):
+    return spark.read\
+        .option("header","true") \
+        .schema(races_schema) \
         .csv(data_file)

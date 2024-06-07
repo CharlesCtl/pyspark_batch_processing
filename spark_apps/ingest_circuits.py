@@ -2,7 +2,7 @@ import sys
 from pyspark.sql import *
 from pyspark.sql.functions import col,current_timestamp
 from lib.logger import Log4j
-from lib.utils import get_spark_app_config,load_df
+from lib.utils import get_spark_app_config,load_circuits_df
 
 
 if __name__ == "__main__":
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     #This is used to print conf parameters
     #conf_out = spark.sparkContext.getConf()
     #logger.info(conf_out.toDebugString())
-    circuits_df = load_df(spark,sys.argv[1])
+    circuits_df = load_circuits_df(spark,sys.argv[1])
     #df.show()
     #df.printSchema()    
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     .withColumnRenamed("alt", "altitude") 
 
     circuits_final_df = circuits_renamed_df.withColumn("ingestion_date", current_timestamp())
-    circuits_final_df.write.mode("overwrite").parquet("/opt/spark/data/tf1")
+    circuits_final_df.write.mode("overwrite").parquet("/opt/spark/data/processed/circuits")
     
     #---------------------------------
     logger.info("Finished Hello Spark")
