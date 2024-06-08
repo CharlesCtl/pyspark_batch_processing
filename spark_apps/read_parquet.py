@@ -16,4 +16,4 @@ if __name__ == "__main__":
     parquetFile.show()
     #---------------------------------
     logger.info("Finished Hello Spark")
-    spark.stop()
+    spark.stop()    
