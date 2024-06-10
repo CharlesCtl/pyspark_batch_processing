@@ -1,6 +1,7 @@
 import configparser
 from pyspark import SparkConf
 from pyspark.sql.types import StructType,StructField,IntegerType,StringType,DoubleType,DateType
+from pyspark.sql.functions import col,current_timestamp
 
 def get_spark_app_config():
     spark_conf = SparkConf()
@@ -34,6 +35,15 @@ def load_circuits_df(spark, data_file):
         .option("header","true") \
         .schema(circuits_schema) \
         .csv(data_file)
+def transform_circuits_df(circuits_df):
+    circuits_selected_df = circuits_df.select(col("circuitId"), col("circuitRef"), col("name"), col("location"), col("country"), col("lat"), col("lng"), col("alt"))
+    circuits_renamed_df = circuits_selected_df.withColumnRenamed("circuitId", "circuit_id") \
+    .withColumnRenamed("circuitRef", "circuit_ref") \
+    .withColumnRenamed("lat", "latitude") \
+    .withColumnRenamed("lng", "longitude") \
+    .withColumnRenamed("alt", "altitude") 
+    return circuits_renamed_df.withColumn("ingestion_date", current_timestamp())
+
 def load_races_df(spark, data_file):
     return spark.read\
         .option("header","true") \

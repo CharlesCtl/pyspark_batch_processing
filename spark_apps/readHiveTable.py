@@ -9,22 +9,16 @@ if __name__ == "__main__":
 #Enable HIVE support to allow connectivity to a persistent Hive Metastore
     spark = SparkSession.builder \
         .config(conf=conf) \
-        .appName("SparkSQL_WriteTable_toHive")\
+        .appName("SparkSQL_ReadFromHive")\
         .config("spark.sql.warehouse.dir", warehouse_location)\
         .enableHiveSupport() \
         .getOrCreate()
     
     logger = Log4j(spark)
     logger.info("¡¡¡ STARTING APP  !!!")
-
-    parquetFile_df = spark.read.parquet("/opt/spark/data/processed/circuits")
     
-    spark.sql("CREATE DATABASE IF NOT EXISTS CIRCUITS_DB")
     spark.catalog.setCurrentDatabase("CIRCUITS_DB")
-
-    parquetFile_df.write \
-    .mode("overwrite")\
-    .saveAsTable("circuits_table")
+    spark.sql("Select count(*) from circuits_table").show()
 
     logger.info(spark.catalog.listTables("CIRCUITS_DB"))
     #---------------------------------
