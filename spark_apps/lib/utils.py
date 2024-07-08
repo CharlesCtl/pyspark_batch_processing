@@ -1,8 +1,8 @@
 import configparser
 from pyspark import SparkConf
-from pyspark.sql.types import StructType,StructField,IntegerType,StringType,DoubleType,DateType,FloatType
 from pyspark.sql.functions import col,current_timestamp,concat,lit
 from pyspark.sql.functions import col,current_timestamp,to_timestamp,concat,lit,spark_partition_id
+from schemas import *
 def get_spark_app_config():
     spark_conf = SparkConf()
     config = configparser.ConfigParser()
@@ -10,83 +10,12 @@ def get_spark_app_config():
     for (key, val) in config.items("SPARK_APP_CONFIGS"):
         spark_conf.set(key, val)
     return spark_conf
-
-circuits_schema = StructType(fields=[StructField("circuitId", IntegerType(), False),
-                                     StructField("circuitRef", StringType(), True),
-                                     StructField("name", StringType(), True),
-                                     StructField("location", StringType(), True),
-                                     StructField("country", StringType(), True),
-                                     StructField("lat", DoubleType(), True),
-                                     StructField("lng", DoubleType(), True),
-                                     StructField("alt", IntegerType(), True),
-                                     StructField("url", StringType(), True)
-])
-races_schema = StructType(fields=[StructField("raceId", IntegerType(), False),
-                                  StructField("year", IntegerType(), True),
-                                  StructField("round", IntegerType(), True),
-                                  StructField("circuitId", IntegerType(), True),
-                                  StructField("name", StringType(), True),
-                                  StructField("date", DateType(), True),
-                                  StructField("time", StringType(), True),
-                                  StructField("url", StringType(), True) 
-])
-constructor_schema = constructors_schema = "constructorId INT, constructorRef STRING, name STRING, nationality STRING, url STRING"
-name_schema = StructType(fields=[StructField("forename", StringType(), True),
-                                 StructField("surname", StringType(), True)
-])
-drivers_schema = StructType(fields=[StructField("driverId", IntegerType(), False),
-                                    StructField("driverRef", StringType(), True),
-                                    StructField("number", IntegerType(), True),
-                                    StructField("code", StringType(), True),
-                                    StructField("name", name_schema),
-                                    StructField("dob", DateType(), True),
-                                    StructField("nationality", StringType(), True),
-                                    StructField("url", StringType(), True)  
-])
-results_schema = StructType(fields=[StructField("resultId", IntegerType(), False),
-                                    StructField("raceId", IntegerType(), True),
-                                    StructField("driverId", IntegerType(), True),
-                                    StructField("constructorId", IntegerType(), True),
-                                    StructField("number", IntegerType(), True),
-                                    StructField("grid", IntegerType(), True),
-                                    StructField("position", IntegerType(), True),
-                                    StructField("positionText", StringType(), True),
-                                    StructField("positionOrder", IntegerType(), True),
-                                    StructField("points", FloatType(), True),
-                                    StructField("laps", IntegerType(), True),
-                                    StructField("time", StringType(), True),
-                                    StructField("milliseconds", IntegerType(), True),
-                                    StructField("fastestLap", IntegerType(), True),
-                                    StructField("rank", IntegerType(), True),
-                                    StructField("fastestLapTime", StringType(), True),
-                                    StructField("fastestLapSpeed", FloatType(), True),
-                                    StructField("statusId", StringType(), True)
-                                    ])
-pit_stops_schema = StructType(fields=[StructField("raceId", IntegerType(), False),
-                                      StructField("driverId", IntegerType(), True),
-                                      StructField("stop", StringType(), True),
-                                      StructField("lap", IntegerType(), True),
-                                      StructField("time", StringType(), True),
-                                      StructField("duration", StringType(), True),
-                                      StructField("milliseconds", IntegerType(), True)
-                                     ])
-lap_times_schema = StructType(fields=[StructField("raceId", IntegerType(), False),
-                                      StructField("driverId", IntegerType(), True),
-                                      StructField("lap", IntegerType(), True),
-                                      StructField("position", IntegerType(), True),
-                                      StructField("time", StringType(), True),
-                                      StructField("milliseconds", IntegerType(), True)
-                                     ])
-qualifying_schema = StructType(fields=[StructField("qualifyId", IntegerType(), False),
-                                      StructField("raceId", IntegerType(), True),
-                                      StructField("driverId", IntegerType(), True),
-                                      StructField("constructorId", IntegerType(), True),
-                                      StructField("number", IntegerType(), True),
-                                      StructField("position", IntegerType(), True),
-                                      StructField("q1", StringType(), True),
-                                      StructField("q2", StringType(), True),
-                                      StructField("q3", StringType(), True),
-                                     ])
+def print_configs(spark,logger):
+    #This is used to print conf parameters
+    conf_out = spark.sparkContext.getConf()
+    logger.info(conf_out.toDebugString())
+    return True
+#---------------------------------------
 def load_circuits_df(spark, data_file):
     return spark.read\
         .option("header","true") \
@@ -110,7 +39,7 @@ def transform_races_df(races_df):
     return races_df.select(col("raceId"), col("year"), col("round"), col("circuitId"), col("name"), col("date"), col("time")) \
     .withColumnRenamed("raceId", "race_id") \
     .withColumnRenamed("year", "race_year") \
-    .withColumnRenamed("circuit", "circuit_id") \
+    .withColumnRenamed("circuitId", "circuit_id") \
     .withColumn("race_timestamp",to_timestamp(concat(races_df.date,lit(' '),races_df.time),"yyyy-MM-dd HH:mm:ss")) \
     .withColumn("ingestion_date", current_timestamp())
 #---------------------------------------

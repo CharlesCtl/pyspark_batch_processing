@@ -2,9 +2,9 @@ version: '3.8'
 
 services:
   spark-master: #The service name and alias for the network
-    container_name: my-spark-master
+    container_name: spark-master-container
     build: . #Build the image from the docker file in the current directory
-    image: my-spark-image #Image build name will take
+    image: spark-image #Image build name will take
     entrypoint: ['./entrypoint.sh', 'master']
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
@@ -12,7 +12,7 @@ services:
       timeout: 3s
       retries: 3
     volumes:
-      - ./raw_data:/opt/spark/data #Binded volumes
+      - ./data:/opt/spark/data #Binded volumes
       - ./spark_apps:/opt/spark/apps #Binded volumes
       #- spark-warehouse:/opt/spark/spark-warehouse
       #- metastore_db:/opt/spark/metastore_db
@@ -24,8 +24,8 @@ services:
       - '7077:7077'
   
   spark-history-server:
-    container_name: my-spark-history
-    image: my-spark-image
+    container_name: spark-history-container
+    image: spark-image
     entrypoint: ['./entrypoint.sh', 'history']
     depends_on:
       - spark-master
@@ -38,14 +38,14 @@ services:
 
   spark-worker:
 #    container_name: da-spark-worker
-    image: my-spark-image
+    image: spark-image
     entrypoint: ['./entrypoint.sh', 'worker']
     depends_on:
       - spark-master
     env_file:
       - .env.spark
     volumes:
-      - ./raw_data:/opt/spark/data
+      - ./data:/opt/spark/data
       - ./spark_apps:/opt/spark/apps
       #- spark-warehouse:/opt/spark/spark-warehouse
       #- metastore_db:/opt/spark/metastore_db
@@ -53,5 +53,5 @@ services:
 
 volumes:
   spark-logs: #This is the named volume
-  spark-warehouse:
+  #spark-warehouse:
   #metastore_db:

@@ -3,14 +3,14 @@ from pyspark.sql import *
 from lib.logger import Log4j
 from lib.utils import get_spark_app_config,load_drivers_df,transform_drivers_df
 
+def ingest_and_transform_drivers(spark,file_path):
+    drivers_df = load_drivers_df(spark,file_path)   
+    drivers_final_df = transform_drivers_df(drivers_df)
+    drivers_final_df.write.mode("overwrite").parquet("/opt/spark/data/processed/drivers")
+    return True
 
 if __name__ == "__main__":
     conf = get_spark_app_config()
-    #-------------------------------
-    #conf = SparkConf()
-    #conf.set("spark.app.name","My spark app")
-    #conf.set("spark.master","")
-    #--------------------------------
     spark = SparkSession.builder \
         .config(conf=conf) \
         .getOrCreate()
@@ -21,17 +21,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     
     logger.info("Starting App!!!")
-    #This is used to print conf parameters
-    #conf_out = spark.sparkContext.getConf()
-    #logger.info(conf_out.toDebugString())
-    drivers_df = load_drivers_df(spark,sys.argv[1])
-    #df.show()
-    #df.printSchema()    
-
-    drivers_final_df = transform_drivers_df(drivers_df)
-    drivers_final_df.write.mode("overwrite").parquet("/opt/spark/data/processed/drivers")
-    drivers_final_df.show()
-    drivers_final_df.printSchema() 
+    ingest_and_transform_drivers(spark,sys.argv[1])
     #---------------------------------
     logger.info("Finished Hello Spark")
     spark.stop()

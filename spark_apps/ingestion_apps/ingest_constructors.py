@@ -3,6 +3,11 @@ from pyspark.sql import *
 from lib.logger import Log4j
 from lib.utils import get_spark_app_config,load_constructors_df,transform_constructors_df
 
+def ingest_and_transform_constructors(spark,file_path):
+    constructors_df = load_constructors_df(spark,file_path)
+    constructors_final_df = transform_constructors_df(constructors_df)
+    constructors_final_df.write.mode("overwrite").parquet("/opt/spark/data/processed/constructors")
+    return True
 
 if __name__ == "__main__":
     conf = get_spark_app_config()
@@ -21,17 +26,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     
     logger.info("Starting App!!!")
-    #This is used to print conf parameters
-    #conf_out = spark.sparkContext.getConf()
-    #logger.info(conf_out.toDebugString())
-    constructors_df = load_constructors_df(spark,sys.argv[1])
-    #df.show()
-    #df.printSchema()    
-
-    constructors_final_df = transform_constructors_df(constructors_df)
-    constructors_final_df.write.mode("overwrite").parquet("/opt/spark/data/processed/constructors")
-    constructors_final_df.show()
-    constructors_final_df.printSchema() 
+    ingest_and_transform_constructors(spark,sys.argv[1])
     #---------------------------------
     logger.info("Finished Hello Spark")
     spark.stop()

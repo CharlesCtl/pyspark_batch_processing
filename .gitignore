@@ -1,2 +1,5 @@
 slides/
-raw_data/processed/
+data/processed/
+data/presentation/
+todos.txt
+data/processed/

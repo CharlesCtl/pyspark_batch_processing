@@ -13,9 +13,6 @@ RUN apt-get update && \
       ssh && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-
-
 ## Download spark and hadoop dependencies and install
 
 # Optional env variables

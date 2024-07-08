@@ -26,6 +26,6 @@ pyspark-interactively:
 	docker exec -it my-spark-master ./bin/pyspark --master spark://spark-master:7077
 
 submit:
-	docker exec my-spark-master spark-submit --master spark://spark-master:7077 --deploy-mode client ./apps/$(app)
+	docker exec spark-master-container spark-submit --master spark://spark-master:7077 --deploy-mode client ./apps/$(app)
 submit-app:
-	docker exec my-spark-master spark-submit --master spark://spark-master:7077 --deploy-mode client ./apps/$(app) ./data/$(file)
+	docker exec spark-master-container spark-submit --master spark://spark-master:7077 --deploy-mode client ./apps/$(app) ./data/$(file)
